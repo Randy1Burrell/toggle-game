@@ -33,4 +33,3 @@ $ make test_continuous
 
 # TODO
 - Add online hosted CI testing configuration such as CircleCI or TravisCi
-- Add unit tests
