@@ -1,0 +1,57 @@
+version: "3"
+
+services:
+  test_server:
+    build:
+      context: .
+      dockerfile: ./cmd/deploy/test.dockerfile
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - test_mongo
+    networks:
+      - tests
+    environment:
+      - MONGODB_HOST=test_mongo
+  test_mongo:
+    image: mongo:4
+    volumes:
+      - test_mongodb_data:/data/test_db
+    env_file:
+      - .env
+    ports:
+      - "${MONGODB_PORT}:${MONGODB_PORT}"
+    expose:
+      - "${MONGODB_PORT}"
+    networks:
+      - tests
+    depends_on:
+      - test_log_stash
+    restart: on-failure
+    logging:
+      driver: syslog
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:${LOGSTASH_PORT}"
+        syslog-format: "rfc3164"
+        tag: "mongo"
+  test_log_stash:
+    image: logstash:7.9.2
+    env_file:
+      - .env
+    networks:
+      - tests
+    logging:
+      driver: syslog
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:${LOGSTASH_PORT}"
+        syslog-format: "rfc3164"
+        tag: "logstash"
+
+networks:
+  tests:
+    driver: bridge
+
+volumes:
+  test_mongodb_data:

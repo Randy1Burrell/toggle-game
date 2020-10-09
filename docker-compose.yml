@@ -1,0 +1,73 @@
+version: "3"
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: ./cmd/deploy/dev.dockerfile
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+    networks:
+      - game
+  mongo:
+    image: mongo:4
+    volumes:
+      - mongodb_data:/data/db
+    env_file:
+      - .env
+    depends_on:
+      - log_stash
+    expose:
+      - "${MONGODB_PORT}"
+    networks:
+      - game
+    logging:
+      driver: syslog
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:${LOGSTASH_PORT}"
+        syslog-format: "rfc3164"
+        tag: "mongo"
+  log_stash:
+    image: logstash:7.9.2
+    env_file:
+      - .env
+    networks:
+      - game
+    expose:
+      - "${LOGSTASH_PORT}"
+    logging:
+      driver: syslog
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:${LOGSTASH_PORT}"
+        syslog-format: "rfc3164"
+        tag: "logstash"
+
+  mongo-express:
+    image: mongo-express
+    ports:
+      - "${MONGO_EXPRESS_PORT}:${MONGO_EXPRESS_PORT}"
+    env_file:
+       - .env
+    depends_on:
+      - log_stash
+    networks:
+      - game
+    logging:
+      driver: syslog
+      options:
+        syslog-address: "udp://${LOGSTASH_HOST}:${LOGSTASH_PORT}"
+        syslog-format: "rfc3164"
+        tag: "mongo-express"
+
+networks:
+  game:
+    driver: bridge
+
+volumes:
+  mongodb_data:
