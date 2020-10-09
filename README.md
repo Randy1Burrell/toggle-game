@@ -22,10 +22,11 @@ $ make test_continuous
 ```
 ## Available Endpoints
 
-| Endpoint                    | Method | Query Param | Datatype                                |
-| /deck                       | POST   | shuffle     | optional boolean                        |
+| Endpoint                    | Method | Query Param |                                Datatype |
+|:----------------------------|:------:|:-----------:|----------------------------------------:|
+| /deck                       | POST   | shuffle     |                        optional boolean |
 |                             |        | cards       | optional string of card codes separated |
-|                             |        |             | by commas. Ex. AS,KD,AC,2C,KH           |
+|                             |        |             |           by commas. Ex. AS,KD,AC,2C,KH |
 |                             |        |             |                                         |
 | /deck/{uuid}                | GET    |             |                                         |
 | /deck/{uuid}/draw?count=int | GET    | count       |                                         |
